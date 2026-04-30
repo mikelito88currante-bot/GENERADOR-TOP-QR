@@ -1,25 +1,16 @@
 {
-  "name": "Generador de Listados",
-  "short_name": "Listados",
-  "description": "Genera códigos alfanuméricos únicos para tus campañas",
+  "name": "Generator TOP QR",
+  "short_name": "TOP QR",
+  "description": "Generador profesional de códigos QR con modo masivo y Ticket Pro",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "background_color": "#f8fafc",
+  "theme_color": "#1e293b",
   "lang": "es",
   "icons": [
-    {
-      "src": "icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ]
+    {"src":"icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ],
+  "categories": ["utilities","productivity"]
 }
