@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Generador de Listados" />
+  <meta name="description" content="Genera códigos alfanuméricos únicos para tus campañas" />
+  <title>Generador de Listados</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface2: #263348;
+      --accent: #3b82f6;
+      --accent-light: #60a5fa;
+      --accent-glow: rgba(59,130,246,0.15);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: rgba(148,163,184,0.12);
+      --success: #22d3a7;
+      --radius: 20px;
+      --radius-sm: 12px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100dvh;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+
+    .app {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 480px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 24px 20px 32px;
+      gap: 24px;
+    }
+
+    /* HEADER */
+    .header {
+      text-align: center;
+      padding-top: 12px;
+    }
+
+    .header-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--accent-glow);
+      border: 1.5px solid rgba(59,130,246,0.3);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+
+    .header-icon svg { width: 32px; height: 32px; color: var(--accent-light); }
+
+    .header h1 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .header p {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    /* BADGE OFFLINE */
+    .offline-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(34,211,167,0.1);
+      border: 1px solid rgba(34,211,167,0.25);
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--success);
+      letter-spacing: 0.05em;
+      margin-top: 12px;
+    }
+
+    .offline-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* CARD */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    /* INPUT SECTION */
+    .input-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .input-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--accent-glow);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .input-icon svg { width: 18px; height: 18px; color: var(--accent-light); }
+
+    .input-text-block { display: flex; flex-direction: column; gap: 2px; }
+
+    .input-sublabel {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .input-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .number-input-wrapper {
+      position: relative;
+    }
+
+    .number-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent-light);
+      text-align: center;
+      outline: none;
+      font-family: 'Space Grotesk', sans-serif;
+      transition: border-color 0.2s, background 0.2s;
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    .number-input::-webkit-outer-spin-button,
+    .number-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    .number-input:focus {
+      border-color: var(--accent);
+      background: rgba(59,130,246,0.06);
+    }
+
+    /* STEPPER BUTTONS */
+    .stepper {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .step-btn {
+      flex: 1;
+      padding: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.02em;
+    }
+
+    .step-btn:active {
+      background: var(--accent-glow);
+      color: var(--accent-light);
+      border-color: rgba(59,130,246,0.3);
+      transform: scale(0.97);
+    }
+
+    /* INFO BOX */
+    .info-box {
+      background: rgba(59,130,246,0.07);
+      border: 1px solid rgba(59,130,246,0.18);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-top: 20px;
+    }
+
+    .info-box svg { width: 16px; height: 16px; color: var(--accent-light); flex-shrink: 0; margin-top: 1px; }
+
+    .info-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .info-list strong {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .info-item {
+      font-size: 11px;
+      font-weight: 500;
+      color: #7dd3fc;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-item::before {
+      content: '';
+      width: 3px;
+      height: 3px;
+      background: #7dd3fc;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* GENERATE BUTTON */
+    .generate-btn {
+      width: 100%;
+      padding: 18px;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      color: white;
+      font-size: 14px;
+      font-weight: 800;
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .generate-btn:not(:disabled):active {
+      transform: scale(0.98);
+      background: #2563eb;
+    }
+
+    .generate-btn:disabled {
+      background: var(--surface2);
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    .generate-btn svg { width: 20px; height: 20px; }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* SUCCESS MESSAGE */
+    .success-msg {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--success);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      animation: fadeInUp 0.3s ease;
+    }
+
+    .success-msg svg { width: 16px; height: 16px; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* NOTES */
+    .notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .notes-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .notes-title svg { width: 14px; height: 14px; color: var(--accent-light); }
+
+    .notes p {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .notes p strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* INSTALL BANNER */
+    .install-banner {
+      background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(34,211,167,0.08));
+      border: 1px solid rgba(59,130,246,0.25);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .install-banner.visible { display: flex; }
+
+    .install-banner-text { flex: 1; }
+    .install-banner-text p { font-size: 13px; font-weight: 600; color: var(--text); }
+    .install-banner-text span { font-size: 11px; color: var(--text-muted); }
+
+    .install-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif;
+      cursor: pointer;
+      white-space: nowrap;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .install-btn:active { transform: scale(0.97); }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- INSTALL PROMPT -->
+  <div class="install-banner" id="installBanner">
+    <div class="install-banner-text">
+      <p>Instalar app</p>
+      <span>Funciona sin internet</span>
+    </div>
+    <button class="install-btn" id="installBtn">Instalar</button>
+  </div>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+    </div>
+    <h1>Generador de Listados</h1>
+    <p>Genera códigos alfanuméricos únicos</p>
+    <div class="offline-badge">Disponible sin internet</div>
+  </header>
+
+  <!-- MAIN CARD -->
+  <div class="card">
+
+    <div class="input-label">
+      <div class="input-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
+          <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+      </div>
+      <div class="input-text-block">
+        <span class="input-sublabel">Cantidad de códigos</span>
+        <span class="input-title">¿Cuántos códigos deseas generar?</span>
+      </div>
+    </div>
+
+    <div class="number-input-wrapper">
+      <input
+        type="number"
+        id="quantityInput"
+        class="number-input"
+        value="100"
+        min="1"
+        max="999999"
+        inputmode="numeric"
+        placeholder="Ej: 500"
+      />
+    </div>
+
+    <div class="stepper">
+      <button class="step-btn" onclick="adjust(-100)">−100</button>
+      <button class="step-btn" onclick="adjust(-10)">−10</button>
+      <button class="step-btn" onclick="adjust(10)">+10</button>
+      <button class="step-btn" onclick="adjust(100)">+100</button>
+    </div>
+
+    <div class="info-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <div class="info-list">
+        <strong>Especificaciones de Generación</strong>
+        <div class="info-item">Longitud fija: 8 caracteres</div>
+        <div class="info-item">Mezcla: Letras, números y símbolos</div>
+        <div class="info-item">Protección CSV: Ningún código empezará por "="</div>
+        <div class="info-item">Formato de salida: CSV (Columna A)</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- GENERATE BUTTON -->
+  <button class="generate-btn" id="generateBtn" onclick="generateCodes()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+    Descargar Listado CSV
+  </button>
+
+  <!-- SUCCESS -->
+  <div class="success-msg" id="successMsg" style="display:none;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    <span id="successText"></span>
+  </div>
+
+  <!-- NOTES -->
+  <div class="notes">
+    <div class="notes-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/>
+        <polyline points="14 2 14 8 20 8"/><path d="M2 15h10"/><path d="m9 12 3 3-3 3"/>
+      </svg>
+      Notas de uso
+    </div>
+    <p>
+      Este generador utiliza algoritmos de aleatoriedad para asegurar que cada código sea difícil de predecir.
+      El archivo generado es ideal para ser importado en la pestaña <strong>Múltiple</strong> o <strong>Ticket Pro</strong>
+      para convertirlos automáticamente en códigos QR.
+    </p>
+  </div>
+
+</div>
+
+<script>
+  const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|";
+
+  function adjust(delta) {
+    const input = document.getElementById('quantityInput');
+    const val = parseInt(input.value) || 0;
+    input.value = Math.max(1, val + delta);
+  }
+
+  function generateCodes() {
+    const input = document.getElementById('quantityInput');
+    const btn = document.getElementById('generateBtn');
+    const successMsg = document.getElementById('successMsg');
+    const successText = document.getElementById('successText');
+    const quantity = Math.max(1, parseInt(input.value) || 0);
+
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div>';
+    successMsg.style.display = 'none';
+
+    setTimeout(() => {
+      const codes = [];
+      for (let i = 0; i < quantity; i++) {
+        let code = "";
+        for (let j = 0; j < 8; j++) {
+          code += charset.charAt(Math.floor(Math.random() * charset.length));
+        }
+        if (code.startsWith('=')) code = 'A' + code.substring(1);
+        codes.push(code);
+      }
+
+      const csvContent = codes.join("\n");
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `listado_codigos_${quantity}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      btn.disabled = false;
+      btn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Descargar Listado CSV`;
+
+      successText.textContent = `¡${quantity} códigos descargados con éxito!`;
+      successMsg.style.display = 'flex';
+    }, 80);
+  }
+
+  // PWA install prompt
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('installBanner').classList.add('visible');
+  });
+
+  document.getElementById('installBtn').addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    if (outcome === 'accepted') {
+      document.getElementById('installBanner').classList.remove('visible');
+    }
+  });
+
+  window.addEventListener('appinstalled', () => {
+    document.getElementById('installBanner').classList.remove('visible');
+  });
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(console.error);
+  }
+</script>
+</body>
+</html>
