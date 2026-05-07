@@ -347,84 +347,111 @@ function MultipleTab({settings,folders,onBulkSave}){
 
 // ─── LIST GENERATOR TAB ───────────────────────────────────────────────────
 function ListGeneratorTab(){
-  const [quantity,setQuantity]=useState(100);
+  const [zones,setZones]=useState([]);
+  const [newQty,setNewQty]=useState(10);
+  const [newZone,setNewZone]=useState('');
   const [generating,setGenerating]=useState(false);
   const [count,setCount]=useState(null);
-  const charset="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|";
+  const charset="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-  const adjust=(d)=>setQuantity(q=>Math.max(1,q+d));
+  const addZone=()=>{
+    if(!newZone.trim()||newQty<1)return;
+    setZones(z=>[...z,{id:crypto.randomUUID(),qty:parseInt(newQty),zone:newZone.trim()}]);
+    setNewZone('');setNewQty(10);
+  };
+
+  const removeZone=(id)=>setZones(z=>z.filter(z=>z.id!==id));
+  const totalCodes=zones.reduce((acc,z)=>acc+z.qty,0);
 
   const generate=()=>{
+    if(!zones.length)return;
     setGenerating(true);
     setTimeout(()=>{
-      const codes=[];
-      for(let i=0;i<quantity;i++){
-        let code=Array.from({length:8},()=>charset[Math.floor(Math.random()*charset.length)]).join('');
-        if(code.startsWith('='))code='A'+code.substring(1);
-        codes.push(code);
-      }
-      const blob=new Blob([codes.join('\n')],{type:'text/csv;charset=utf-8;'});
+      const rows=['CODIGO,ZONA'];
+      zones.forEach(({qty,zone})=>{
+        for(let i=0;i<qty;i++){
+          let code=Array.from({length:8},()=>charset[Math.floor(Math.random()*charset.length)]).join('');
+          if(code.startsWith('='))code='A'+code.substring(1);
+          rows.push(`${code},${zone}`);
+        }
+      });
+      const blob=new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8;'});
       const a=document.createElement('a');
       a.href=URL.createObjectURL(blob);
-      a.download=`listado_codigos_${quantity}.csv`;
+      a.download=`listado_zonas_${Date.now()}.csv`;
       document.body.appendChild(a);a.click();document.body.removeChild(a);
       URL.revokeObjectURL(a.href);
-      setCount(quantity);setGenerating(false);
+      setCount(totalCodes);setGenerating(false);
     },80);
   };
 
   return React.createElement("div",{className:"max-w-2xl mx-auto space-y-6 anim-fade"},
     React.createElement("div",{className:"text-center"},
       React.createElement("h2",{className:"text-2xl font-black text-neutral-800 uppercase tracking-tight"},"Generador de Listados"),
-      React.createElement("p",{className:"text-neutral-500 text-xs font-bold uppercase tracking-widest mt-1"},"Genera códigos alfanuméricos únicos para tus campañas")
+      React.createElement("p",{className:"text-neutral-500 text-xs font-bold uppercase tracking-widest mt-1"},"Columna A: Código · Columna B: Zona")
     ),
-    React.createElement("div",{className:"bg-white p-8 rounded-3xl border border-neutral-200 shadow-xl space-y-6"},
-      React.createElement("div",null,
-        React.createElement("div",{className:"flex items-center gap-3 mb-4"},
-          React.createElement("div",{className:"w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center"},
-            React.createElement(Ic,{name:"hash",size:18,color:"#2563eb"})
-          ),
-          React.createElement("div",null,
-            React.createElement("label",{className:"text-xs font-black text-neutral-400 uppercase tracking-widest block"},"Cantidad de códigos"),
-            React.createElement("p",{className:"text-sm font-bold text-neutral-700"},"¿Cuántos códigos deseas generar?")
-          )
+    // Añadir zona
+    React.createElement("div",{className:"bg-white p-6 rounded-3xl border border-neutral-200 shadow-xl space-y-4"},
+      React.createElement("div",{className:"flex items-center gap-2 pb-3 border-b border-neutral-100"},
+        React.createElement("div",{className:"w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center"},
+          React.createElement(Ic,{name:"plus",size:16,color:"#2563eb"})
         ),
-        React.createElement("input",{type:"number",value:quantity,onChange:e=>setQuantity(Math.max(1,parseInt(e.target.value)||0)),className:"w-full px-6 py-4 bg-neutral-50 border border-neutral-200 rounded-2xl font-black text-xl text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center",style:{MozAppearance:'textfield'}}),
-        React.createElement("div",{className:"flex gap-2 mt-3"},
-          [[-100,'-100'],[-10,'-10'],[10,'+10'],[100,'+100']].map(([d,l])=>
-            React.createElement("button",{key:l,onClick:()=>adjust(d),className:"flex-1 py-2 bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 rounded-xl text-sm font-bold text-neutral-600 transition-all"},l)
-          )
-        )
+        React.createElement("span",{className:"text-sm font-black text-neutral-800 uppercase tracking-widest"},"Añadir Zona")
       ),
-      React.createElement("div",{className:"bg-blue-50 p-4 rounded-2xl border border-blue-100 flex gap-3"},
-        React.createElement(Ic,{name:"info",size:16,color:"#2563eb"}),
-        React.createElement("div",null,
-          React.createElement("p",{className:"text-xs text-blue-800 font-bold uppercase tracking-tight mb-2"},"Especificaciones:"),
-          ["Longitud fija: 8 caracteres","Mezcla: Letras, números y símbolos","Protección CSV: No empieza por \"=\"","Formato: CSV (Columna A)"].map((t,i)=>
-            React.createElement("div",{key:i,className:"flex items-center gap-2 text-xs text-blue-700 font-medium"},
-              React.createElement("span",{style:{width:4,height:4,background:'#3b82f6',borderRadius:'50%',flexShrink:0,display:'inline-block'}}),t
-            )
-          )
+      React.createElement("div",{className:"flex gap-3"},
+        React.createElement("div",{className:"flex flex-col gap-1"},
+          React.createElement("label",{className:"text-xs font-bold text-neutral-400 uppercase"},"Cantidad"),
+          React.createElement("input",{type:"number",min:1,value:newQty,onChange:e=>setNewQty(Math.max(1,parseInt(e.target.value)||1)),className:"w-24 px-3 py-3 bg-neutral-50 border border-neutral-200 rounded-xl font-black text-blue-600 text-center focus:outline-none focus:ring-2 focus:ring-blue-500",style:{MozAppearance:'textfield'}})
+        ),
+        React.createElement("div",{className:"flex flex-col gap-1 flex-1"},
+          React.createElement("label",{className:"text-xs font-bold text-neutral-400 uppercase"},"Zona"),
+          React.createElement("input",{type:"text",value:newZone,onChange:e=>setNewZone(e.target.value),onKeyDown:e=>e.key==='Enter'&&addZone(),placeholder:"Ej: Pista, Grada, Front Stage...",className:"flex-1 px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"})
+        ),
+        React.createElement("div",{className:"flex flex-col gap-1"},
+          React.createElement("label",{className:"text-xs font-bold text-neutral-400 uppercase opacity-0"},"Add"),
+          React.createElement("button",{onClick:addZone,disabled:!newZone.trim()||newQty<1,className:"px-5 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-neutral-200 text-white rounded-xl font-black text-sm transition-all"},"+")
         )
+      )
+    ),
+    // Lista de zonas
+    zones.length>0&&React.createElement("div",{className:"bg-white rounded-3xl border border-neutral-200 shadow-xl overflow-hidden"},
+      React.createElement("div",{className:"p-4 bg-neutral-50 border-b border-neutral-100 flex justify-between items-center"},
+        React.createElement("span",{className:"text-xs font-black text-neutral-800 uppercase tracking-widest flex items-center gap-2"},
+          React.createElement(Ic,{name:"layers",size:14,color:"#2563eb"}),
+          zones.length+" zona"+(zones.length>1?"s":"")+" · "+totalCodes+" códigos en total"
+        ),
+        React.createElement("button",{onClick:()=>setZones([]),className:"text-xs font-bold text-red-400 hover:text-red-600 uppercase"},"Limpiar todo")
       ),
+      React.createElement("div",{className:"divide-y divide-neutral-100"},
+        zones.map((z,i)=>React.createElement("div",{key:z.id,className:"flex items-center gap-4 px-5 py-3"},
+          React.createElement("div",{className:"w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white text-xs font-black"},i+1),
+          React.createElement("div",{className:"flex-1"},
+            React.createElement("span",{className:"font-black text-neutral-800"},z.zone),
+            React.createElement("span",{className:"text-neutral-400 text-xs font-bold ml-2"},"·  "+z.qty+" códigos")
+          ),
+          React.createElement("button",{onClick:()=>removeZone(z.id),className:"p-1.5 text-neutral-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"},
+            React.createElement(Ic,{name:"x",size:14})
+          )
+        ))
+      )
+    ),
+    // Botón generar
+    zones.length>0&&React.createElement("div",{className:"space-y-3"},
       React.createElement("button",{onClick:generate,disabled:generating,className:"w-full py-5 bg-neutral-900 text-white rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-black transition-all flex items-center justify-center gap-3 shadow-xl disabled:bg-neutral-300"},
         generating?React.createElement("div",{className:"spin",style:{width:18,height:18,border:'2px solid rgba(255,255,255,.3)',borderTopColor:'white',borderRadius:'50%'}}):React.createElement(Ic,{name:"download",size:18,color:"white"}),
-        "DESCARGAR LISTADO CSV"
+        generating?'GENERANDO...':'DESCARGAR CSV ('+totalCodes+' CÓDIGOS)'
       ),
       count&&React.createElement("div",{className:"flex items-center justify-center gap-2 text-green-600"},
         React.createElement(Ic,{name:"check",size:16,color:"#16a34a"}),
         React.createElement("span",{className:"text-xs font-black uppercase tracking-widest"},"¡"+count+" códigos descargados!")
       )
     ),
-    React.createElement("div",{className:"bg-neutral-50 p-5 rounded-2xl border border-neutral-200"},
-      React.createElement("div",{className:"flex items-center gap-2 mb-3"},
-        React.createElement(Ic,{name:"hash",size:14,color:"#2563eb"}),
-        React.createElement("span",{className:"text-xs font-black text-neutral-800 uppercase tracking-widest"},"Notas de uso")
-      ),
-      React.createElement("p",{className:"text-xs text-neutral-500 font-medium leading-relaxed"},
-        "Genera códigos únicos para importar en la pestaña ",
-        React.createElement("strong",null,"Múltiple")," o ",React.createElement("strong",null,"Ticket Pro"),
-        " para convertirlos automáticamente en códigos QR."
+    // Info
+    React.createElement("div",{className:"bg-blue-50 p-4 rounded-2xl border border-blue-100 flex gap-3"},
+      React.createElement(Ic,{name:"info",size:16,color:"#2563eb"}),
+      React.createElement("p",{className:"text-xs text-blue-800 font-medium leading-relaxed"},
+        "El CSV generado tendrá ",React.createElement("strong",null,"Columna A: Código")," y ",React.createElement("strong",null,"Columna B: Zona"),
+        ". Puedes importarlo directamente en la pestaña ",React.createElement("strong",null,"Ticket Pro"),"."
       )
     )
   );
