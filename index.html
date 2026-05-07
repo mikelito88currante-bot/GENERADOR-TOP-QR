@@ -49,7 +49,6 @@
 <script>
 const {useState,useEffect,useRef,useCallback}=React;
 
-// ─── ICONS (inline SVG) ────────────────────────────────────────────────────
 const Icon=({d,size=16,stroke=2,fill="none",color="currentColor"})=>React.createElement("svg",{xmlns:"http://www.w3.org/2000/svg",width:size,height:size,viewBox:"0 0 24 24",fill,stroke:color,strokeWidth:stroke,strokeLinecap:"round",strokeLinejoin:"round"},
   typeof d==="string"?React.createElement("path",{d}):d
 );
@@ -108,7 +107,6 @@ const Ic=({name,size=16,color="currentColor"})=>{
   );
 };
 
-// ─── QR GENERATOR UTILITY ─────────────────────────────────────────────────
 function generateQRDataURL(text,size,fgColor,bgColor,level){
   return new Promise((resolve,reject)=>{
     try{
@@ -118,13 +116,11 @@ function generateQRDataURL(text,size,fgColor,bgColor,level){
   });
 }
 
-// ─── STORAGE ────────────────────────────────────────────────────────────────
 const STORAGE_KEY='pro-qr-generator-data';
 const SETTINGS_KEY='pro-qr-generator-settings';
 const loadFolders=()=>{try{const s=localStorage.getItem(STORAGE_KEY);return s?JSON.parse(s):[{id:'default',name:'General',items:[]}];}catch{return [{id:'default',name:'General',items:[]}];}};
 const loadSettings=()=>{try{const s=localStorage.getItem(SETTINGS_KEY);return s?JSON.parse(s):{fgColor:'#000000',bgColor:'#ffffff',level:'M'};}catch{return {fgColor:'#000000',bgColor:'#ffffff',level:'M'};}};
 
-// ─── GENERATOR TAB ────────────────────────────────────────────────────────
 function GeneratorTab({settings,folders,onSave,onCreateFolder}){
   const [input,setInput]=useState('');
   const [qrUrl,setQrUrl]=useState('');
@@ -192,7 +188,6 @@ function GeneratorTab({settings,folders,onSave,onCreateFolder}){
           React.createElement(Ic,{name:"save",size:16}),"Guardar")
       )
     ),
-    // Save Modal
     saving&&React.createElement("div",{className:"fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4",onClick:e=>e.target===e.currentTarget&&setSaving(false)},
       React.createElement("div",{className:"bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl"},
         React.createElement("h3",{className:"text-xl font-bold mb-4"},"Guardar en Historial"),
@@ -225,7 +220,6 @@ function GeneratorTab({settings,folders,onSave,onCreateFolder}){
   );
 }
 
-// ─── MULTIPLE TAB ─────────────────────────────────────────────────────────
 function MultipleTab({settings,folders,onBulkSave}){
   const [data,setData]=useState([]);
   const [fileName,setFileName]=useState('');
@@ -345,7 +339,6 @@ function MultipleTab({settings,folders,onBulkSave}){
   );
 }
 
-// ─── LIST GENERATOR TAB ───────────────────────────────────────────────────
 function ListGeneratorTab(){
   const [quantity,setQuantity]=useState(100);
   const [generating,setGenerating]=useState(false);
@@ -430,7 +423,6 @@ function ListGeneratorTab(){
   );
 }
 
-// ─── HISTORY TAB ──────────────────────────────────────────────────────────
 function HistoryTab({folders,onDeleteFolder,onDeleteQR,settings}){
   const hasItems=folders.some(f=>f.items.length>0);
   if(!hasItems) return React.createElement("div",{className:"flex flex-col items-center justify-center py-20 text-neutral-400 gap-4 anim-fade"},
@@ -498,7 +490,6 @@ function HistoryTab({folders,onDeleteFolder,onDeleteQR,settings}){
   );
 }
 
-// ─── SETTINGS TAB ─────────────────────────────────────────────────────────
 function SettingsTab({settings,onChange}){
   const levels=[{l:'Bajo (L)',v:'L',d:'~7% tolerancia'},{l:'Medio (M)',v:'M',d:'~15% tolerancia'},{l:'Alto (Q)',v:'Q',d:'~25% tolerancia'},{l:'Máximo (H)',v:'H',d:'~30% tolerancia'}];
   return React.createElement("div",{className:"max-w-xl mx-auto space-y-8 anim-fade"},
@@ -535,7 +526,6 @@ function SettingsTab({settings,onChange}){
   );
 }
 
-// ─── HOW IT WORKS TAB ────────────────────────────────────────────────────
 function HowItWorksTab(){
   return React.createElement("div",{className:"space-y-8 max-w-2xl mx-auto anim-fade"},
     React.createElement("div",{className:"text-center space-y-2"},
@@ -571,7 +561,6 @@ function HowItWorksTab(){
   );
 }
 
-// ─── TICKET PRO TAB ───────────────────────────────────────────────────────
 function TicketProTab({settings,folders,onBulkSave}){
   const [ticketData,setTicketData]=useState([]);
   const [bgImage,setBgImage]=useState(null);
@@ -598,7 +587,6 @@ function TicketProTab({settings,folders,onBulkSave}){
     await new Promise(r=>{img.onload=r;img.src=bgImage;});
     canvas.width=img.width;canvas.height=img.height;
     ctx.drawImage(img,0,0);
-    // QR
     const qrVal=mode==='preview'?'PREVIEW':rowData?.qrContent||'';
     if(qrVal){
       try{
@@ -613,7 +601,6 @@ function TicketProTab({settings,folders,onBulkSave}){
         ctx.drawImage(qrImg,qx,qy,qrSize,qrSize);
       }catch(e){}
     }
-    // Texts
     textFields.forEach(field=>{
       let txt=field.isDynamic&&rowData?String(rowData.rawData[field.columnMapping??0]||''):field.value;
       if(mode==='preview'&&field.isDynamic)txt=`[${field.label}]`;
@@ -669,7 +656,6 @@ function TicketProTab({settings,folders,onBulkSave}){
   },label);
 
   return React.createElement("div",{className:"flex flex-col gap-6 anim-fade"},
-    // Header
     React.createElement("div",{className:"flex flex-col sm:flex-row justify-between items-center bg-white p-4 rounded-2xl border border-neutral-200 shadow-sm gap-4"},
       React.createElement("div",{className:"flex items-center gap-3"},
         React.createElement("div",{className:"p-2 bg-orange-600 rounded-lg text-white"},React.createElement(Ic,{name:"ticket",size:20,color:"white"})),
@@ -679,8 +665,6 @@ function TicketProTab({settings,folders,onBulkSave}){
         tabBtn("Guía",'guide','orange'),tabBtn("Datos",'data'),tabBtn("Diseño",'design')
       )
     ),
-
-    // Guide
     activeTab==='guide'&&React.createElement("div",{className:"bg-white rounded-3xl border border-neutral-200 shadow-xl overflow-hidden max-w-4xl mx-auto w-full"},
       React.createElement("div",{className:"bg-orange-600 p-8 text-white"},
         React.createElement("h3",{className:"text-2xl font-black uppercase flex items-center gap-3"},React.createElement(Ic,{name:"book",size:28,color:"white"}),"Guía Rápida: Ticket-Pro"),
@@ -700,12 +684,8 @@ function TicketProTab({settings,folders,onBulkSave}){
         React.createElement("button",{onClick:()=>setActiveTab('data'),className:"px-8 py-3 bg-white text-black rounded-xl font-black uppercase text-xs tracking-widest hover:bg-orange-500 hover:text-white transition-all"},"Empezar")
       )
     ),
-
-    // Data + Design panels
     activeTab!=='guide'&&React.createElement("div",{className:"flex flex-col lg:flex-row gap-6"},
-      // Left panel - Data
       activeTab==='data'&&React.createElement("div",{className:"w-full lg:w-96 flex flex-col gap-4"},
-        // Data upload
         React.createElement("div",{className:"bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm space-y-4"},
           React.createElement("h3",{className:"text-xs font-black text-neutral-400 uppercase tracking-widest flex items-center gap-2"},React.createElement(Ic,{name:"database",size:14,color:"#60a5fa"}),"Fuente de Datos"),
           React.createElement("div",{onClick:()=>fileRef.current?.click(),className:"w-full py-8 border-2 border-dashed border-neutral-200 rounded-2xl hover:border-blue-400 hover:bg-blue-50 transition-all flex flex-col items-center gap-3 cursor-pointer"},
@@ -717,7 +697,6 @@ function TicketProTab({settings,folders,onBulkSave}){
             )
           )
         ),
-        // Image upload
         React.createElement("div",{className:"bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm space-y-4"},
           React.createElement("h3",{className:"text-xs font-black text-neutral-400 uppercase tracking-widest flex items-center gap-2"},React.createElement(Ic,{name:"image",size:14,color:"#f97316"}),"Diseño Base"),
           React.createElement("div",{onClick:()=>imgRef.current?.click(),className:"w-full py-8 border-2 border-dashed border-neutral-200 rounded-2xl hover:border-orange-400 hover:bg-orange-50 transition-all flex flex-col items-center gap-3 cursor-pointer"},
@@ -739,10 +718,7 @@ function TicketProTab({settings,folders,onBulkSave}){
           zipping?progress+"%":"Generar y Organizar"
         )
       ),
-
-      // Left panel - Design
       activeTab==='design'&&React.createElement("div",{className:"w-full lg:w-96 flex flex-col gap-4 overflow-y-auto custom-scrollbar",style:{maxHeight:'80vh'}},
-        // Layers
         React.createElement("div",{className:"bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden"},
           React.createElement("div",{className:"p-4 bg-neutral-50 border-b border-neutral-100 flex justify-between items-center"},
             React.createElement("h3",{className:"text-xs font-black text-neutral-800 uppercase tracking-widest flex items-center gap-2"},React.createElement(Ic,{name:"layers",size:14,color:"#ea580c"}),"Capas de Diseño"),
@@ -763,7 +739,6 @@ function TicketProTab({settings,folders,onBulkSave}){
             ))
           )
         ),
-        // Inspector
         selectedId&&React.createElement("div",{className:"bg-white rounded-2xl border border-neutral-200 shadow-sm p-5 space-y-5"},
           React.createElement("div",{className:"flex justify-between items-center"},
             React.createElement("span",{className:"text-xs font-black text-neutral-400 uppercase tracking-widest"},"Propiedades"),
@@ -801,7 +776,6 @@ function TicketProTab({settings,folders,onBulkSave}){
                   React.createElement("label",{className:"text-xs font-bold text-neutral-500 uppercase block mb-1"},"Texto"),
                   React.createElement("input",{value:selectedField.value,onChange:e=>updateField(selectedField.id,{value:e.target.value}),className:"w-full bg-neutral-50 border border-neutral-100 rounded-lg px-3 py-2 text-xs font-bold"})
                 ),
-              // Alignment + Style
               React.createElement("div",null,
                 React.createElement("label",{className:"text-xs font-bold text-neutral-500 uppercase block mb-2"},"Alineación y Estilo"),
                 React.createElement("div",{className:"flex gap-1"},
@@ -813,7 +787,6 @@ function TicketProTab({settings,folders,onBulkSave}){
                   React.createElement("button",{onClick:()=>updateField(selectedField.id,{isItalic:!selectedField.isItalic}),className:`p-2 flex-1 rounded-lg ${selectedField.isItalic?'bg-blue-600 text-white':'bg-neutral-50 text-neutral-400'}`},React.createElement(Ic,{name:"italic",size:14}))
                 )
               ),
-              // Position
               React.createElement("div",{className:"space-y-3"},
                 React.createElement("label",{className:"text-xs font-bold text-neutral-500 uppercase block"},"Posición"),
                 ["x","y"].map(k=>React.createElement("div",{key:k},
@@ -821,7 +794,6 @@ function TicketProTab({settings,folders,onBulkSave}){
                   React.createElement("input",{type:"range",value:selectedField[k],onChange:e=>updateField(selectedField.id,{[k]:parseInt(e.target.value)}),className:"w-full accent-blue-600 mt-1"})
                 ))
               ),
-              // Size + Color
               React.createElement("div",null,
                 React.createElement("label",{className:"text-xs font-bold text-neutral-500 uppercase block mb-2"},"Tamaño y Color"),
                 React.createElement("div",{className:"flex gap-4 items-center"},
@@ -832,8 +804,6 @@ function TicketProTab({settings,folders,onBulkSave}){
             )
         )
       ),
-
-      // Canvas preview
       activeTab!=='guide'&&React.createElement("div",{className:"flex-1 bg-neutral-900 rounded-2xl relative overflow-hidden flex items-center justify-center p-4 border-4 border-white",style:{minHeight:400}},
         React.createElement("div",{className:"absolute top-4 left-1/2 -translate-x-1/2 z-10"},
           React.createElement("div",{className:"bg-black/40 backdrop-blur px-4 py-1.5 rounded-full border border-white/10 flex items-center gap-2"},
@@ -852,7 +822,6 @@ function TicketProTab({settings,folders,onBulkSave}){
   );
 }
 
-// ─── MAIN APP ─────────────────────────────────────────────────────────────
 function App(){
   const [tab,setTab]=useState('generator');
   const [settings,setSettings]=useState(loadSettings);
@@ -884,7 +853,6 @@ function App(){
   ];
 
   return React.createElement("div",{className:"min-h-screen bg-neutral-50 flex flex-col items-center p-3 md:p-6"},
-    // Logo
     React.createElement("div",{className:"flex items-center gap-3 mb-6 cursor-default"},
       React.createElement("div",{className:"relative"},
         React.createElement("div",{className:"w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg"},
@@ -899,17 +867,13 @@ function App(){
         React.createElement("span",{className:"text-xs font-bold text-neutral-400 uppercase tracking-widest"},"Premium Solutions")
       )
     ),
-
-    // Card
     React.createElement("div",{className:"w-full max-w-6xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-neutral-200"},
-      // Nav
       React.createElement("nav",{className:"flex flex-wrap border-b border-neutral-100 bg-neutral-50/50 overflow-x-auto"},
         tabs.map(t=>React.createElement("button",{key:t.id,onClick:()=>setTab(t.id),className:`flex-1 min-w-0 flex items-center justify-center gap-1.5 py-3 px-2 text-xs font-bold transition-all ${tab===t.id?t.activeClass:'tab-inactive'}`},
           React.createElement(Ic,{name:t.icon,size:15}),
           React.createElement("span",{className:"hidden sm:inline"},t.label)
         ))
       ),
-      // Content
       React.createElement("div",{className:"p-4 md:p-8 min-h-[500px]"},
         tab==='generator'&&React.createElement(GeneratorTab,{settings,folders,onSave:saveQR,onCreateFolder:createFolder}),
         tab==='pro'&&React.createElement(MultipleTab,{settings,folders,onBulkSave:saveBulkQRs}),
@@ -920,8 +884,6 @@ function App(){
         tab==='settings'&&React.createElement(SettingsTab,{settings,onChange:setSettings})
       )
     ),
-
-    // Footer
     React.createElement("footer",{className:"mt-6 text-neutral-400 text-xs text-center flex flex-col gap-1 uppercase tracking-widest font-bold"},
       React.createElement("p",null,"GENERATOR TOP QR © "+new Date().getFullYear()),
       React.createElement("div",{className:"flex items-center justify-center gap-4 mt-1"},
@@ -929,8 +891,6 @@ function App(){
         React.createElement("span",{className:"flex items-center gap-1"},React.createElement(Ic,{name:"shield",size:10,color:"#22c55e"}),"Local Storage")
       )
     ),
-
-    // Install banner
     React.createElement("div",{id:"installBanner",className:"hidden fixed bottom-4 left-4 right-4 bg-white rounded-2xl shadow-2xl border border-neutral-200 p-4 flex items-center gap-3 z-50"},
       React.createElement("div",{className:"flex-1"},
         React.createElement("p",{className:"font-bold text-sm"},"Instalar app"),
@@ -943,7 +903,6 @@ function App(){
 
 ReactDOM.render(React.createElement(App),document.getElementById('root'));
 
-// PWA install
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt',e=>{
   e.preventDefault();deferredPrompt=e;
